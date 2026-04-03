@@ -90,7 +90,7 @@ menu::menu(QWidget *parent)
     QPixmap pix_31("/mnt/hgfs/VS/QT/kehuduan/picture/pidandoufu.png");
     ui->label_209->setPixmap(pix_31);
 
-    // 以下是新增的 9 个饮品 ✅
+    // 饮品
     QPixmap pix_32("/mnt/hgfs/VS/QT/kehuduan/picture/yumipaigutang.png");
     ui->label_64->setPixmap(pix_32);
     QPixmap pix_33("/mnt/hgfs/VS/QT/kehuduan/picture/wujichashugutang.png");
@@ -110,7 +110,7 @@ menu::menu(QWidget *parent)
     QPixmap pix_40("/mnt/hgfs/VS/QT/kehuduan/picture/baishikele.png");
     ui->label_244->setPixmap(pix_40);
 
-    // 初始化菜品列表（6个菜只写一次）
+    // 初始化菜品列表
     m_dishes = {
         {"麻辣小龙虾", 40, &malaxiaolongxia_count, ui->label},
         {"干锅蟹",     45, &ganguoxie_count,       ui->label_20},
@@ -171,7 +171,7 @@ menu::menu(QWidget *parent)
 
     // 设置字体：20号 + 加粗
     QFont font;
-    font.setPointSize(20);
+    font.setPointSize(15);
     font.setBold(true);
     ui->label_26->setFont(font);
 
@@ -273,9 +273,6 @@ void menu::update_cart()
         ui->tableWidget->removeRow(0);
     }
 
-    // ==============================
-    // ✅ 核心修复：只显示【唯一菜名】
-    // ==============================
     QSet<QString> alreadyAdded;  // 已经加过的菜，不再加第二次
     int total = 0;
 
@@ -284,7 +281,7 @@ void menu::update_cart()
         const Dish& dish = m_dishes[i];
         int cnt = *dish.count;
 
-        // 重点：同一个菜，只加一次！
+        // 同一个菜，只加一次！
         if (cnt > 0 && !alreadyAdded.contains(dish.name))
         {
             alreadyAdded.insert(dish.name); // 标记已添加
@@ -318,6 +315,14 @@ void menu::readServerData()
     QByteArray ba = tcpSocket->readAll();
     QString msg = ba;
 
+    // 🔥 收到服务器关闭指令
+    if(msg == "SERVER_CLOSE")
+    {
+        QMessageBox::warning(this, "服务器通知", "服务器已关闭，程序即将退出！");
+        tcpSocket->close();
+        this->close();
+        return;
+    }
     if(msg.contains("SERVER_TABLE_OK"))
     {
         QMessageBox::information(this, "呼叫成功", "前台已收到您的服务请求！");

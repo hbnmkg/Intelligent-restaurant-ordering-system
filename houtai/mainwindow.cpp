@@ -13,21 +13,9 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     setWindowTitle("点餐服务器");
 
-    // 创建服务器
-    server = new QTcpServer(this);
 
-    // 监听端口 50000
-    if(server->listen(QHostAddress::Any, 50000))
-    {
-        qDebug() << "  服务器启动成功！监听端口：50000";
-    }
-    else
-    {
-        qDebug() << "服务器启动失败！";
-    }
-
-    // 绑定新连接信号
-    connect(server, &QTcpServer::newConnection, this, &MainWindow::newConnection);
+    server = nullptr;
+    clientSocket = nullptr;
 }
 
 MainWindow::~MainWindow()
@@ -229,6 +217,23 @@ void MainWindow::on_pushButton_3_clicked()
         ui->stackedWidget->setCurrentIndex(1); // 切页
         ui->lineEdit->clear();
         ui->lineEdit_2->clear();
+
+        // 创建服务器
+        server = new QTcpServer(this);
+
+        // 监听端口 50000
+        if(server->listen(QHostAddress::Any, 50000))
+        {
+            qDebug() << "  服务器启动成功！监听端口：50000";
+        }
+        else
+        {
+            qDebug() << "服务器启动失败！";
+        }
+
+
+        // 绑定新连接信号
+        connect(server, &QTcpServer::newConnection, this, &MainWindow::newConnection);
     }
     else
     {
@@ -298,6 +303,22 @@ void MainWindow::on_pushButton_4_clicked()
 
 void MainWindow::on_pushButton_5_clicked()
 {
+    // 1. 如果有客户端连接，发送断开消息
+    if(clientSocket != nullptr && clientSocket->state() == QAbstractSocket::ConnectedState)
+    {
+        clientSocket->write("SERVER_CLOSE"); // 发给客户端：服务器关闭
+        clientSocket->flush();               // 立即发送
+        clientSocket->disconnectFromHost();  // 断开连接
+    }
+
+    // 2. 关闭服务器，不再接收新连接
+    if(server != nullptr)
+    {
+        server->close();
+        delete server;
+        server = nullptr;
+    }
+
     QMessageBox::information(this, "成功", "退出成功！");
     ui->stackedWidget->setCurrentIndex(0);
 }

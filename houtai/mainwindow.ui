@@ -167,7 +167,7 @@ QPushButton:pressed {
        <string>退出登陆</string>
       </property>
      </widget>
-     <widget class="QWidget" name="">
+     <widget class="QWidget" name="layoutWidget">
       <property name="geometry">
        <rect>
         <x>460</x>
@@ -185,7 +185,7 @@ QPushButton:pressed {
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="">
+     <widget class="QWidget" name="layoutWidget">
       <property name="geometry">
        <rect>
         <x>250</x>
